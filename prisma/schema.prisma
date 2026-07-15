@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  name           String
+  role           String          // "ADMIN", "PRINCIPAL", "TEACHER"
+  teacherProfile TeacherProfile?
+}
+
+model TeacherProfile {
+  id             String      @id @default(cuid())
+  userId         String      @unique
+  user           User        @relation(fields: [userId], references: [id])
+  department     String
+  gradeLevels    String      // JSON string array
+  sections       String      // JSON string array
+  subjects       String      // JSON string array
+  schedule       String
+  totalSubmitted Int         @default(0)
+  approved       Int         @default(0)
+  forRevision    Int         @default(0)
+  missing        Int         @default(0)
+  complianceRate Float       @default(0)
+  status         String
+  avatar         String
+
+  lessonLogs     LessonLog[]
+  schedules      Schedule[]
+}
+
+model LessonLog {
+  id               String   @id @default(cuid())
+  teacherProfileId String
+  teacherProfile   TeacherProfile @relation(fields: [teacherProfileId], references: [id])
+  learningArea     String
+  teachingDates    String
+  submittedDate    DateTime @default(now())
+  status           String   // "Pending Review", "Approved", "For Revision"
+  originalFilename String
+  fileVersion      String
+  schoolYear       String
+  term             String
+  weekNumber       String
+  timeliness       String
+  remarks          String?
+  approvedBy       String?
+  approvedDate     DateTime?
+  
+  content          String   // JSON string
+}
+
+model Schedule {
+  id               String   @id @default(cuid())
+  teacherProfileId String
+  teacherProfile   TeacherProfile @relation(fields: [teacherProfileId], references: [id])
+  day              String
+  timeStart        String
+  timeEnd          String
+  gradeId          String
+  sectionName      String
+  subjectName      String
+}
+
+model Learner {
+  id             String   @id @default(cuid())
+  name           String
+  gradeId        String
+  gradeSection   String
+  gpa            Float
+  performance    String
+  attendance     Float
+  guardian       String
+  contact        String
+  riskLevel      String
+  interventions  String   // JSON string array
+}
+
+model GradeLevel {
+  id       String @id
+  name     String
+  level    Int
+  keyStage String
+  count    Int
+}
+
+model Subject {
+  id          String @id
+  name        String
+  code        String
+  department  String
+  type        String
+  targetBand  String
+}
+
+model AttendanceRecord {
+  id             String   @id @default(cuid())
+  date           String
+  gradeId        String
+  sectionName    String
+  records        String   // JSON { studentId: "Present" | "Late" | "Absent" }
+  submittedDate  DateTime @default(now())
+}
+
+model ChecklistRubric {
+  id    String @id
+  text  String
+  value String
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  user      String
+  action    String
+  type      String
+}
+
+model SystemConfig {
+  id                  String @id @default("default")
+  schoolYear          String
+  term                String
+  activeFramework     String
+  subscriptionTier    String
+  subscriptionStatus  String
+  renewalDate         String
+  allottedUsers       Int
+  allottedLearners    Int
+  storageAllotted     Float
+  storageUsed         Float
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+}
