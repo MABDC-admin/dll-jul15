@@ -99,10 +99,15 @@ export default function TeacherProfileTabs({
 
   // Calculate dynamic sections and subjects for the selected grade
   const selectedGradeObj = allGrades.find(g => g.name === selectedLoadGrade);
-  const availableSections = selectedGradeObj ? JSON.parse(selectedGradeObj.sections || '[]') : [];
+  let availableSections = selectedGradeObj ? JSON.parse(selectedGradeObj.sections || '[]') : [];
+  
+  // Fallback if no sections are configured in Admin yet
+  if (selectedLoadGrade && availableSections.length === 0) {
+    availableSections = ['Section A', 'Section B', 'Section C', 'Section D'];
+  }
   
   // Filter centralized subjects by checking if selectedLoadGrade is in their gradeLevels array
-  const availableSubjects = selectedLoadGrade 
+  let availableSubjects = selectedLoadGrade 
     ? allSubjects
         .filter(sub => {
           const mappedGrades = JSON.parse(sub.gradeLevels || '[]');
@@ -110,6 +115,11 @@ export default function TeacherProfileTabs({
         })
         .map(sub => sub.name)
     : [];
+
+  // Fallback if no subjects are configured for this grade in Admin yet
+  if (selectedLoadGrade && availableSubjects.length === 0) {
+    availableSubjects = allSubjects.map(sub => sub.name);
+  }
 
   return (
     <div className="space-y-6">
