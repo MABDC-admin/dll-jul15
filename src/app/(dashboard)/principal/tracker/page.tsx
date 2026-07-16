@@ -19,18 +19,47 @@ export default async function WeeklyTrackerPage({
   const selectedWeek = searchParams.week || '1';
   const selectedTerm = searchParams.term || '1st Term';
 
-  // Fetch all teachers
-  const teachers = await prisma.teacherProfile.findMany({
-    include: {
-      user: true,
-      lessonLogs: {
-        where: { 
-          weekNumber: selectedWeek,
-          term: selectedTerm
+  // Fetch all teachers and grades
+  const [teachers, allGrades] = await Promise.all([
+    prisma.teacherProfile.findMany({
+      include: {
+        user: true,
+        subjectLoads: true,
+        lessonLogs: {
+          where: { 
+            weekNumber: selectedWeek,
+            term: selectedTerm
+          }
         }
       }
-    },
-    orderBy: { user: { name: 'asc' } }
+    }),
+    prisma.gradeLevel.findMany({
+      orderBy: { level: 'asc' }
+    })
+  ]);
+
+  const gradeLevelMap = new Map(allGrades.map(g => [g.id, g.level]));
+  const gradeNameMap = new Map(allGrades.map(g => [g.name, g.level]));
+
+  // Sort by lowest grade level assigned
+  const sortedTeachers = teachers.sort((a, b) => {
+    const getLowestGrade = (teacher: any) => {
+      if (!teacher.subjectLoads || teacher.subjectLoads.length === 0) return 999;
+      const levels = teacher.subjectLoads.map((load: any) => {
+        return gradeLevelMap.get(load.gradeId) ?? gradeNameMap.get(load.gradeId) ?? 999;
+      });
+      return Math.min(...levels);
+    };
+
+    const levelA = getLowestGrade(a);
+    const levelB = getLowestGrade(b);
+
+    if (levelA !== levelB) {
+      return levelA - levelB;
+    }
+    
+    // Sort alphabetically by name as fallback
+    return a.user.name.localeCompare(b.user.name);
   });
 
   const weekOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
@@ -92,8 +121,17 @@ export default async function WeeklyTrackerPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {teachers.map(teacher => {
-                const assignedSubjects: string[] = JSON.parse(teacher.subjects || '[]');
+              {sortedTeachers.map(teacher => {
+                let assignedSubjects: string[] = Array.from(new Set(teacher.subjectLoads.map((l: any) => l.subjectName)));
+                
+                // Fallback to flat arrays if empty (for backwards compatibility)
+                if (assignedSubjects.length === 0) {
+                  try {
+                    assignedSubjects = JSON.parse(teacher.subjects || '[]');
+                  } catch {
+                    assignedSubjects = [];
+                  }
+                }
                 
                 // Get unique submitted subjects for this week
                 const submittedLogs = teacher.lessonLogs;
@@ -114,7 +152,11 @@ export default async function WeeklyTrackerPage({
                         </div>
                         <div>
                           <p className="text-sm font-bold text-slate-800">{teacher.user.name}</p>
-                          <p className="text-[10px] text-slate-500">{teacher.department}</p>
+                          <p className="text-[10px] text-slate-500">
+                            {teacher.subjectLoads && teacher.subjectLoads.length > 0 
+                              ? Array.from(new Set(teacher.subjectLoads.map((l: any) => l.gradeId))).join(", ")
+                              : teacher.department}
+                          </p>
                         </div>
                       </div>
                     </td>
