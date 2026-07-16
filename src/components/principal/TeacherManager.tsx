@@ -132,12 +132,12 @@ export default function TeacherManager({ initialTeachers, allDepartments }: { in
               <p className="text-slate-500 font-semibold">Grades: <span className="text-slate-800">
                 {t.subjectLoads && t.subjectLoads.length > 0 
                   ? Array.from(new Set(t.subjectLoads.map((l: any) => l.gradeId))).join(", ") 
-                  : 'Unassigned'}
+                  : (t.gradeLevels && JSON.parse(t.gradeLevels || '[]').length > 0 ? JSON.parse(t.gradeLevels || '[]').join(", ") : 'Unassigned')}
               </span></p>
               <p className="text-slate-500 font-semibold">Subjects: <span className="text-slate-800">
                 {t.subjectLoads && t.subjectLoads.length > 0 
                   ? Array.from(new Set(t.subjectLoads.map((l: any) => l.subjectName))).join(", ") 
-                  : 'Unassigned'}
+                  : (t.subjects && JSON.parse(t.subjects || '[]').length > 0 ? JSON.parse(t.subjects || '[]').join(", ") : 'Unassigned')}
               </span></p>
             </div>
 
