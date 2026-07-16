@@ -85,7 +85,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socketRef.current = null;
       initializedRef.current = false;
     };
-  }, [status, session?.user?.id]);
+  }, [status, (session?.user as any)?.id]);
 
   const markAsRead = async () => {
     if (unreadCount === 0) return;
