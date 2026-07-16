@@ -26,7 +26,7 @@ import {
   X
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useSocket } from '@/providers/SocketProvider';
 
@@ -46,6 +46,16 @@ export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
   const { unreadCount } = useSocket();
   const [isOpen, setIsOpen] = useState(false);
+  const [pendingAnecdotalCount, setPendingAnecdotalCount] = useState(0);
+
+  useEffect(() => {
+    if (role === 'PRINCIPAL') {
+      fetch('/api/anecdotal-count')
+        .then(res => res.json())
+        .then(data => setPendingAnecdotalCount(data.count || 0))
+        .catch(() => {});
+    }
+  }, [role]);
 
   const navItems: Record<string, SidebarItem[]> = {
     ADMIN: [
@@ -61,7 +71,7 @@ export default function Sidebar({ role }: SidebarProps) {
       { id: 'dashboard', label: 'Dashboard', href: '/principal', icon: BookOpen },
       { id: 'tracker', label: 'Weekly Tracker', href: '/principal/tracker', icon: ClipboardList },
       { id: 'ddlReview', label: 'DDL Review', href: '/principal/dll', icon: FileCheck },
-      { id: 'anecdotalReview', label: 'Anecdotal Review', href: '/principal/anecdotal', icon: AlertTriangle },
+      { id: 'anecdotalReview', label: 'Anecdotal Review', href: '/principal/anecdotal', icon: AlertTriangle, badge: pendingAnecdotalCount },
       { id: 'calendar', label: 'School Calendar', href: '/principal/calendar', icon: CalendarDays },
       { id: 'announcements', label: 'Announcements', href: '/principal/announcements', icon: Bell },
       { id: 'teachers', label: 'Teachers Directory', href: '/principal/teachers', icon: Users },
