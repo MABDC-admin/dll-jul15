@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { getNotifications, markNotificationsAsRead } from '@/app/actions/notifications';
 import { useSession } from 'next-auth/react';
@@ -33,27 +33,41 @@ export const useSocket = () => useContext(SocketContext);
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const socketRef = useRef<Socket | null>(null);
+  const initializedRef = useRef(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
-    // Fetch initial notifications
+    // Don't initialize until session is loaded
+    if (status !== 'authenticated' || !session?.user) return;
+    
+    // Prevent duplicate initialization
+    if (initializedRef.current && socketRef.current?.connected) return;
+    initializedRef.current = true;
+
+    // Fetch initial notifications (only once)
     getNotifications().then((data) => {
       setNotifications(data);
     });
 
-    // Initialize socket
+    // Reuse existing socket or create new one
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+
     const socketInstance = io(process.env.NEXT_PUBLIC_SITE_URL || '', {
       path: '/api/socket',
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+      transports: ['websocket', 'polling'],
     });
 
     socketInstance.on('connect', () => {
-      console.log('Connected to socket', socketInstance.id);
       if (session?.user) {
-        // Join user's personal room
         socketInstance.emit('join', `USER_${(session.user as any).id}`);
-        // Join role room
         socketInstance.emit('join', `ROLE_${(session.user as any).role}`);
       }
     });
@@ -63,12 +77,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       toast.success(notification.message);
     });
 
+    socketRef.current = socketInstance;
     setSocket(socketInstance);
 
     return () => {
       socketInstance.disconnect();
+      socketRef.current = null;
+      initializedRef.current = false;
     };
-  }, [session]);
+  }, [status, session?.user?.id]);
 
   const markAsRead = async () => {
     if (unreadCount === 0) return;

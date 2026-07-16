@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { cachedQuery } from '@/lib/cache';
 import TeacherManager from '@/components/principal/TeacherManager';
 
 export default async function TeachersDirectory() {
@@ -12,9 +13,9 @@ export default async function TeachersDirectory() {
     prisma.department.findMany({
       orderBy: { name: 'asc' }
     }),
-    prisma.gradeLevel.findMany({
+    cachedQuery('allGrades', () => prisma.gradeLevel.findMany({
       orderBy: { level: 'asc' }
-    })
+    }), 120000)
   ]);
 
   // Create a map of gradeId -> level for fast lookup

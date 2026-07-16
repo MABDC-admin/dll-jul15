@@ -1,0 +1,47 @@
+=== PM2 STATUS ===
+┌────┬─────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name            │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼─────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ mabdc-portal    │ default     │ N/A     │ fork    │ 17282    │ 6m     │ 28   │ online    │ 0%       │ 55.4mb   │ root     │ disabled │
+└────┴─────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+host metrics | cpu: 3.5% | ram usage: 16.6% | eth0: ⇓ 0mb/s ⇑ 0.001mb/s | disk: ⇓ 0.009mb/s ⇑ 0.023mb/s |
+=== MEMORY ===
+               total        used        free      shared  buff/cache   available
+Mem:            3819         647        1265           5        2205        3171
+Swap:              0           0           0
+=== DISK ===
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        38G  4.3G   32G  12% /
+=== UPTIME / LOAD ===
+ 13:40:29 up  2:40,  3 users,  load average: 0.01, 0.10, 0.15
+=== TOP PROCESSES BY CPU ===
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       17518  5.1  0.2  15232 11116 ?        Ss   13:40   0:00 sshd: root@notty
+root       17295  2.5  4.3 23970816 171448 ?     Sl   13:34   0:09 next-server (v16.2.10)
+root       15442  1.3  1.7 1015152 69588 ?       Ssl  12:39   0:48 node /usr/bin/pm2 monit
+root       17282  0.3  1.4 1094028 57016 ?       Ssl  13:34   0:01 npm run start -H 127.0.0.1 -p 3000
+root        7840  0.2  1.6 1037476 64800 ?       Ssl  11:06   0:26 PM2 v7.0.3: God Daemon (/root/.pm2)
+root         893  0.1  0.1  80712  4116 ?        Ssl  11:00   0:11 /usr/sbin/qemu-ga
+root           1  0.0  0.3  22636 13808 ?        Ss   10:59   0:06 /sbin/init
+www-data   14896  0.0  0.2  23916  9388 ?        S    12:10   0:03 nginx: worker process
+www-data   14895  0.0  0.2  24172  9528 ?        S    12:10   0:02 nginx: worker process
+root       15304  0.0  0.0      0     0 ?        I    12:20   0:01 [kworker/1:2-cgroup_free]
+root       15274  0.0  0.0      0     0 ?        I    12:18   0:01 [kworker/0:0-events]
+=== TOP PROCESSES BY MEM ===
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root       17295  2.5  4.3 23970816 171448 ?     Sl   13:34   0:09 next-server (v16.2.10)
+root       15442  1.3  1.7 1015152 69588 ?       Ssl  12:39   0:48 node /usr/bin/pm2 monit
+root        7840  0.2  1.6 1037476 64800 ?       Ssl  11:06   0:26 PM2 v7.0.3: God Daemon (/root/.pm2)
+root       17282  0.3  1.4 1094028 57016 ?       Ssl  13:34   0:01 npm run start -H 127.0.0.1 -p 3000
+root         375  0.0  0.7 289112 27448 ?        SLsl 11:00   0:01 /sbin/multipathd -d -s
+root         940  0.0  0.5 109684 23380 ?        Ssl  11:00   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root           1  0.0  0.3  22636 13808 ?        Ss   10:59   0:06 /sbin/init
+systemd+     576  0.0  0.3  21588 13228 ?        Ss   11:00   0:00 /usr/lib/systemd/systemd-resolved
+root         324  0.0  0.2  33988 11604 ?        S<s  11:00   0:01 /usr/lib/systemd/systemd-journald
+root        1523  0.0  0.2  20264 11548 ?        Ss   11:04   0:00 /usr/lib/systemd/systemd --user
+root       17518  5.1  0.2  15232 11116 ?        Ss   13:40   0:00 sshd: root@notty
+=== NODE PROCESS MEMORY ===
+    PID    VSZ   RSS COMMAND
+  15442 1015152 69588 node
+=== PRISMA LOG NOISE ===
+Prisma query logging is ON — this floods pm2 logs and wastes CPU

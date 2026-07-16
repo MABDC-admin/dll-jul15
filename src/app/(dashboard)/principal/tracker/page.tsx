@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { cachedQuery } from '@/lib/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
@@ -33,9 +34,9 @@ export default async function WeeklyTrackerPage({
         }
       }
     }),
-    prisma.gradeLevel.findMany({
+    cachedQuery('allGrades', () => prisma.gradeLevel.findMany({
       orderBy: { level: 'asc' }
-    })
+    }), 120000)
   ]);
 
   const gradeLevelMap = new Map(allGrades.map(g => [g.id, g.level]));
