@@ -29,8 +29,6 @@ export default function TeacherProfileTabs({
 
   const subjectLoads = profile.subjectLoads || [];
 
-  const subjectLoads = profile.subjectLoads || [];
-
   const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   const formatTime = (time: string) => {
