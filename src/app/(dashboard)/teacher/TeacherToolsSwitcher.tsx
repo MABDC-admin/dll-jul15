@@ -17,7 +17,7 @@ interface Subject {
   gradeLevels: string;
 }
 
-export default function TeacherToolsSwitcher({ grades, subjects }: { grades: Grade[], subjects: Subject[] }) {
+export default function TeacherToolsSwitcher({ subjectLoads }: { subjectLoads: any[] }) {
   const [activeTab, setActiveTab] = useState<'DLL' | 'SCHEDULE'>('DLL');
 
   return (
@@ -48,10 +48,10 @@ export default function TeacherToolsSwitcher({ grades, subjects }: { grades: Gra
               <h3 className="text-sm font-bold text-slate-800">Create Daily Lesson Log</h3>
               <p className="text-[10px] text-slate-500">Construct high-quality instructional designs compliant with guidelines.</p>
             </div>
-            <CreateDLLForm />
+            <CreateDLLForm subjectLoads={subjectLoads} />
           </div>
         ) : (
-          <ScheduleBuilderForm grades={grades} subjects={subjects} />
+          <ScheduleBuilderForm subjectLoads={subjectLoads} />
         )}
       </div>
     </div>

@@ -6,25 +6,9 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { revalidatePath } from 'next/cache';
 
 async function syncTeacherArrays(teacherProfileId: string) {
-  // Get all active subject loads for this teacher
-  const loads = await prisma.teacherSubjectLoad.findMany({
-    where: { teacherProfileId }
-  });
-
-  // Extract unique values
-  const uniqueGrades = Array.from(new Set(loads.map(l => l.gradeId)));
-  const uniqueSections = Array.from(new Set(loads.map(l => l.sectionName)));
-  const uniqueSubjects = Array.from(new Set(loads.map(l => l.subjectName)));
-
-  // Update the flat JSON arrays on the TeacherProfile
-  await prisma.teacherProfile.update({
-    where: { id: teacherProfileId },
-    data: {
-      gradeLevels: JSON.stringify(uniqueGrades),
-      sections: JSON.stringify(uniqueSections),
-      subjects: JSON.stringify(uniqueSubjects),
-    }
-  });
+  // Flat arrays are deprecated in favor of strict TeacherSubjectLoad records.
+  // We no longer sync unique grades/sections/subjects back into flat JSON strings.
+  return;
 }
 
 export async function addSubjectLoad(formData: FormData) {

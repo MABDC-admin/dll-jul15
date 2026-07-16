@@ -29,10 +29,7 @@ export default function TeacherProfileTabs({
 
   const subjectLoads = profile.subjectLoads || [];
 
-  // Used for the schedule dropdowns
-  const assignedGrades = JSON.parse(profile.gradeLevels || '[]');
-  const assignedSections = JSON.parse(profile.sections || '[]');
-  const assignedSubjects = JSON.parse(profile.subjects || '[]');
+  const subjectLoads = profile.subjectLoads || [];
 
   const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
@@ -48,6 +45,17 @@ export default function TeacherProfileTabs({
   async function handleAddSchedule(formData: FormData) {
     setIsPending(true);
     formData.set('teacherProfileId', profile.id);
+    const loadDataStr = formData.get('loadData') as string;
+    if (loadDataStr) {
+      try {
+        const loadData = JSON.parse(loadDataStr);
+        formData.set('gradeId', loadData.gradeId);
+        formData.set('sectionName', loadData.sectionName);
+        formData.set('subjectName', loadData.subjectName);
+      } catch (e) {
+        // ignore JSON parse error
+      }
+    }
     try {
       await addTeacherScheduleBlock(formData);
       toast.success("Schedule block added successfully");
@@ -260,7 +268,7 @@ export default function TeacherProfileTabs({
                 <Plus className="w-5 h-5 text-indigo-600" /> Add Class Block
               </h3>
               
-              {(!assignedGrades.length || !assignedSections.length || !assignedSubjects.length) ? (
+              {subjectLoads.length === 0 ? (
                 <div className="p-4 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-sm font-semibold">
                   You must assign a Subject Load to this teacher first!
                 </div>
@@ -268,7 +276,7 @@ export default function TeacherProfileTabs({
                 <form action={handleAddSchedule} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1">Day of Week</label>
-                    <select required name="day" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
+                    <select required name="day" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
                       <option value="">Select Day...</option>
                       {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
@@ -277,35 +285,23 @@ export default function TeacherProfileTabs({
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <label className="block text-xs font-bold text-slate-500 mb-1">Start Time</label>
-                      <input required type="time" name="timeStart" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" />
+                      <input required type="time" name="timeStart" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
                     </div>
                     <div className="flex-1">
                       <label className="block text-xs font-bold text-slate-500 mb-1">End Time</label>
-                      <input required type="time" name="timeEnd" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" />
+                      <input required type="time" name="timeEnd" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Grade Level</label>
-                    <select required name="gradeId" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
-                      <option value="">Select Grade...</option>
-                      {assignedGrades.map((g: string) => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Section</label>
-                    <select required name="sectionName" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
-                      <option value="">Select Section...</option>
-                      {assignedSections.map((s: string) => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Subject</label>
-                    <select required name="subjectName" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
-                      <option value="">Select Subject...</option>
-                      {assignedSubjects.map((s: string) => <option key={s} value={s}>{s}</option>)}
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Assigned Class (Subject Load)</label>
+                    <select required name="loadData" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                      <option value="">Select an assigned class...</option>
+                      {subjectLoads.map((load: any) => (
+                        <option key={load.id} value={JSON.stringify({ gradeId: load.gradeId, sectionName: load.sectionName, subjectName: load.subjectName })}>
+                          {load.subjectName} ({load.gradeId} - {load.sectionName})
+                        </option>
+                      ))}
                     </select>
                   </div>
 

@@ -5,34 +5,22 @@ import { addScheduleBlock } from './actions';
 import { useState, useEffect } from 'react';
 import { getValidSubjectsForGrade } from '@/lib/subject-mapper';
 
-interface Grade {
-  id: string;
-  name: string;
-}
-
-interface Subject {
-  id: string;
-  name: string;
-  code: string;
-  gradeLevels: string;
-}
-
-export default function ScheduleBuilderForm({ grades, subjects }: { grades: Grade[], subjects: Subject[] }) {
+export default function ScheduleBuilderForm({ subjectLoads }: { subjectLoads: any[] }) {
   const [isPending, setIsPending] = useState(false);
-  const [selectedGradeId, setSelectedGradeId] = useState('');
-
-  // Default to first grade on load
-  useEffect(() => {
-    if (grades.length > 0 && !selectedGradeId) {
-      setSelectedGradeId(grades[0].id);
-    }
-  }, [grades]);
-
-  const selectedGrade = grades.find(g => g.id === selectedGradeId);
-  const validSubjects = selectedGrade ? getValidSubjectsForGrade(selectedGrade.name, subjects) : [];
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
+    const loadDataStr = formData.get('loadData') as string;
+    if (loadDataStr) {
+      try {
+        const loadData = JSON.parse(loadDataStr);
+        formData.set('gradeId', loadData.gradeId);
+        formData.set('sectionName', loadData.sectionName);
+        formData.set('subjectName', loadData.subjectName);
+      } catch (e) {
+        // ignore parse error
+      }
+    }
     try {
       await addScheduleBlock(formData);
       toast.success("Schedule block added successfully.");
@@ -69,37 +57,17 @@ export default function ScheduleBuilderForm({ grades, subjects }: { grades: Grad
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="block text-slate-500 font-semibold mb-1">Grade Level</label>
-            <select 
-              name="gradeId" 
-              value={selectedGradeId}
-              onChange={(e) => setSelectedGradeId(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg bg-white outline-none"
-            >
-              {grades.map(g => (
-                <option key={g.id} value={g.id}>{g.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-slate-500 font-semibold mb-1">Section</label>
-            <select name="sectionName" className="w-full p-2 border border-slate-200 rounded-lg bg-white outline-none">
-              <option value="Section A">Section A</option>
-              <option value="Section B">Section B</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-slate-500 font-semibold mb-1">Learning Subject Area</label>
-          <select name="subjectName" className="w-full p-2 border border-slate-200 rounded-lg bg-white outline-none">
-            {validSubjects.length === 0 ? (
-              <option value="" disabled>No subjects for this grade...</option>
+        <div className="pt-2">
+          <label className="block text-slate-500 font-semibold mb-1">Assigned Class (Subject Load)</label>
+          <select required name="loadData" className="w-full p-2 border border-slate-200 rounded-lg bg-white outline-none">
+            <option value="" disabled selected>Select an assigned class...</option>
+            {subjectLoads.length === 0 ? (
+              <option value="" disabled>No subject loads assigned by Principal...</option>
             ) : (
-              validSubjects.map((s: any) => (
-                <option key={s.id} value={s.name}>{s.name} [{s.code}]</option>
+              subjectLoads.map((load: any) => (
+                <option key={load.id} value={JSON.stringify({ gradeId: load.gradeId, sectionName: load.sectionName, subjectName: load.subjectName })}>
+                  {load.subjectName} ({load.gradeId} - {load.sectionName})
+                </option>
               ))
             )}
           </select>

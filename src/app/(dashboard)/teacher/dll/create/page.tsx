@@ -6,7 +6,7 @@ import CreateDLLForm from './CreateDLLForm';
 export default async function DLLCreatePage() {
   const session = await getServerSession(authOptions);
   
-  let assignedSubjects: string[] = [];
+  let subjectLoads: any[] = [];
   let existingLogs: any[] = [];
   
   if (session?.user?.id) {
@@ -14,12 +14,12 @@ export default async function DLLCreatePage() {
       where: { id: session.user.id },
       include: { 
         teacherProfile: {
-          include: { lessonLogs: true }
+          include: { lessonLogs: true, subjectLoads: true }
         } 
       }
     });
-    if (user?.teacherProfile?.subjects) {
-      assignedSubjects = JSON.parse(user.teacherProfile.subjects);
+    if (user?.teacherProfile?.subjectLoads) {
+      subjectLoads = user.teacherProfile.subjectLoads;
     }
     existingLogs = user?.teacherProfile?.lessonLogs || [];
   }
@@ -30,7 +30,7 @@ export default async function DLLCreatePage() {
         <h3 className="text-base font-bold text-slate-800">Generate and Submit Daily Lesson Log (DLL)</h3>
         <p className="text-xs text-slate-500 mt-1">Fill up the structured DepEd compliance template below.</p>
       </div>
-      <CreateDLLForm assignedSubjects={assignedSubjects} existingLogs={existingLogs} />
+      <CreateDLLForm subjectLoads={subjectLoads} existingLogs={existingLogs} />
     </div>
   );
 }

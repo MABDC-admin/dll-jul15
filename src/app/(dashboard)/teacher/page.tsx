@@ -21,7 +21,8 @@ export default async function TeacherDashboard() {
       teacherProfile: {
         include: { 
           lessonLogs: { take: 5, orderBy: { submittedDate: 'desc' } },
-          anecdotalRecords: { take: 5, orderBy: { submittedDate: 'desc' }, include: { learner: true } }
+          anecdotalRecords: { take: 5, orderBy: { submittedDate: 'desc' }, include: { learner: true } },
+          subjectLoads: true
         }
       }
     }
@@ -35,7 +36,7 @@ export default async function TeacherDashboard() {
   }
 
   const profile = user.teacherProfile;
-  const subjectsAssigned = JSON.parse(profile.subjects).length;
+  const subjectsAssigned = profile.subjectLoads.length;
 
   const latestAnnouncement = await prisma.announcement.findFirst({
     where: { 
@@ -183,7 +184,7 @@ export default async function TeacherDashboard() {
         </div>
 
         <div className="lg:col-span-1">
-          <TeacherToolsSwitcher grades={grades} subjects={subjects} />
+          <TeacherToolsSwitcher subjectLoads={profile.subjectLoads} />
         </div>
       </div>
       
