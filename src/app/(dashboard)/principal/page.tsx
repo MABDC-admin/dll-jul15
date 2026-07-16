@@ -15,7 +15,17 @@ export default async function PrincipalDashboard() {
   const recentLogs = await prisma.lessonLog.findMany({
     take: 10,
     orderBy: { submittedDate: 'desc' },
-    include: { teacherProfile: { include: { user: true } } }
+    select: {
+      id: true,
+      learningArea: true,
+      status: true,
+      teacherProfile: {
+        select: {
+          gradeLevels: true,
+          user: { select: { name: true } }
+        }
+      }
+    }
   });
 
   return (
@@ -85,10 +95,6 @@ export default async function PrincipalDashboard() {
 
           <div className="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[350px]">
             {recentLogs.map((entry) => {
-              const contentObj = entry.content ? JSON.parse(entry.content) : {};
-              const rawTopic = contentObj.topic || "No topic specified";
-              const topicPreview = rawTopic.replace(/<[^>]*>?/gm, '');
-
               return (
                 <div key={entry.id} className="p-4 flex flex-col hover:bg-slate-50/60 transition animate-fadeIn gap-3">
                   <div className="flex items-center justify-between">
@@ -108,13 +114,6 @@ export default async function PrincipalDashboard() {
                       <Link href={`/principal/dll/${entry.id}`} className="bg-indigo-600 text-white text-[11px] font-bold px-2.5 py-1 rounded hover:bg-indigo-700 transition">
                         Review
                       </Link>
-                    </div>
-                  </div>
-                  <div className="pl-11 pr-4">
-                    <div className="bg-slate-50 border border-slate-100 p-2.5 rounded-lg">
-                      <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
-                        <span className="font-bold text-slate-700">Topic:</span> {topicPreview}
-                      </p>
                     </div>
                   </div>
                 </div>

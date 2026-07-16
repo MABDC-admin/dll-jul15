@@ -20,7 +20,17 @@ export default async function TeacherDashboard() {
     include: {
       teacherProfile: {
         include: { 
-          lessonLogs: { take: 5, orderBy: { submittedDate: 'desc' } },
+          lessonLogs: { 
+            take: 5, 
+            orderBy: { submittedDate: 'desc' },
+            select: {
+              id: true,
+              learningArea: true,
+              weekNumber: true,
+              submittedDate: true,
+              status: true
+            }
+          },
           anecdotalRecords: { take: 5, orderBy: { submittedDate: 'desc' }, include: { learner: true } },
           subjectLoads: true
         }
@@ -28,8 +38,7 @@ export default async function TeacherDashboard() {
     }
   });
 
-  const grades = await prisma.gradeLevel.findMany({ orderBy: { level: 'asc' } });
-  const subjects = await prisma.subject.findMany({ orderBy: { name: 'asc' } });
+
 
   if (!user || !user.teacherProfile) {
     return <div>Teacher profile not found.</div>;
@@ -112,16 +121,10 @@ export default async function TeacherDashboard() {
 
             <div className="divide-y divide-slate-100 flex-1">
               {profile.lessonLogs.map((entry) => {
-                const contentData = entry.content ? JSON.parse(entry.content) : {};
-                const rawTopicStr = contentData.topic || 'No topic provided';
-                const topicStr = rawTopicStr.replace(/<[^>]*>?/gm, '');
                 return (
                 <div key={entry.id} className="p-4 flex items-center justify-between hover:bg-slate-50/60 transition group">
                   <div className="flex-1 min-w-0 pr-4">
                     <p className="text-xs font-bold text-slate-800">{entry.learningArea}</p>
-                    <p className="text-[11px] font-medium text-indigo-600 mt-0.5 truncate" title={topicStr}>
-                      Topic: {topicStr}
-                    </p>
                     <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wide">
                       W{entry.weekNumber} • {entry.submittedDate.toLocaleDateString()}
                     </p>
