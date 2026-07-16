@@ -133,6 +133,7 @@ export default function Sidebar({ role }: SidebarProps) {
             <Link
               key={item.id}
               href={item.href}
+              prefetch={false}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
                 isActive 
                   ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10" 
