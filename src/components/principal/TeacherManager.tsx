@@ -5,11 +5,14 @@ import Link from 'next/link';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { createTeacherProfile, updateTeacherProfile, deleteTeacherProfile } from '@/app/(dashboard)/principal/teachers/actions';
+import { useRouter } from 'next/navigation';
+import { safeJsonParse } from '@/lib/utils';
 
 export default function TeacherManager({ initialTeachers, allDepartments }: { initialTeachers: any[], allDepartments: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -56,7 +59,7 @@ export default function TeacherManager({ initialTeachers, allDepartments }: { in
         toast.success("New teacher added successfully");
       }
       setIsModalOpen(false);
-      window.location.reload(); // Quick refresh to grab new data
+      router.refresh(); // Quick refresh to grab new data
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
@@ -71,7 +74,7 @@ export default function TeacherManager({ initialTeachers, allDepartments }: { in
     try {
       await deleteTeacherProfile(userId);
       toast.success("Teacher account deleted");
-      window.location.reload();
+      router.refresh();
     } catch (err: any) {
       toast.error(err.message || "Failed to delete");
     } finally {
@@ -132,12 +135,12 @@ export default function TeacherManager({ initialTeachers, allDepartments }: { in
               <p className="text-slate-500 font-semibold">Grades: <span className="text-slate-800">
                 {t.subjectLoads && t.subjectLoads.length > 0 
                   ? Array.from(new Set(t.subjectLoads.map((l: any) => l.gradeId))).join(", ") 
-                  : (t.gradeLevels && JSON.parse(t.gradeLevels || '[]').length > 0 ? JSON.parse(t.gradeLevels || '[]').join(", ") : 'Unassigned')}
+                  : (t.gradeLevels && safeJsonParse<string[]>(t.gradeLevels, []).length > 0 ? safeJsonParse<string[]>(t.gradeLevels, []).join(", ") : 'Unassigned')}
               </span></p>
               <p className="text-slate-500 font-semibold">Subjects: <span className="text-slate-800">
                 {t.subjectLoads && t.subjectLoads.length > 0 
                   ? Array.from(new Set(t.subjectLoads.map((l: any) => l.subjectName))).join(", ") 
-                  : (t.subjects && JSON.parse(t.subjects || '[]').length > 0 ? JSON.parse(t.subjects || '[]').join(", ") : 'Unassigned')}
+                  : (t.subjects && safeJsonParse<string[]>(t.subjects, []).length > 0 ? safeJsonParse<string[]>(t.subjects, []).join(", ") : 'Unassigned')}
               </span></p>
             </div>
 

@@ -74,9 +74,9 @@ export async function resubmitDLL(formData: FormData) {
     }
   });
 
-  // Notify Principals
+  // Notify Principals concurrently
   const principals = await prisma.user.findMany({ where: { role: 'PRINCIPAL' } });
-  for (const principal of principals) {
+  await Promise.all(principals.map(async (principal) => {
     const notif = await prisma.notification.create({
       data: {
         userId: principal.id,
@@ -88,7 +88,7 @@ export async function resubmitDLL(formData: FormData) {
       (global as any).io.to(`USER_${principal.id}`).emit('new-notification', notif);
       (global as any).io.to(`ROLE_PRINCIPAL`).emit('new-notification', notif);
     }
-  }
+  }));
 
   revalidatePath('/teacher/dll');
   revalidatePath('/principal/dll');

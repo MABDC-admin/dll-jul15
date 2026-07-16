@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Layers, Plus, Trash2, Edit2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { addSectionToGrade, removeSectionFromGrade, addSubjectToGrade, removeSubjectFromGrade } from '@/app/(dashboard)/admin/grades/actions';
+import { safeJsonParse } from '@/lib/utils';
 
 export default function GradeManager({ grades }: { grades: any[] }) {
   const [expandedGradeId, setExpandedGradeId] = useState<string | null>(null);
@@ -82,8 +83,8 @@ export default function GradeManager({ grades }: { grades: any[] }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {grades.map((g) => {
-          const sections = JSON.parse(g.sections || '[]');
-          const subjects = JSON.parse(g.subjects || '[]');
+          const sections = safeJsonParse<string[]>(g.sections, []);
+          const subjects = safeJsonParse<string[]>(g.subjects, []);
           const isExpanded = expandedGradeId === g.id;
 
           return (

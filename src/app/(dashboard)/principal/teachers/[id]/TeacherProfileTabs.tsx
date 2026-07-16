@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { addTeacherScheduleBlock, removeTeacherScheduleBlock } from './actions';
 import { addSubjectLoad, removeSubjectLoad } from './loadActions';
+import { safeJsonParse } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 export default function TeacherProfileTabs({ 
   schedules, 
@@ -23,6 +25,7 @@ export default function TeacherProfileTabs({
 }) {
   const [activeTab, setActiveTab] = useState<'schedule' | 'dlls' | 'load'>('load');
   const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
 
   // Dynamic dropdown state for assigning Subject Load
   const [selectedLoadGrade, setSelectedLoadGrade] = useState('');
@@ -99,7 +102,7 @@ export default function TeacherProfileTabs({
 
   // Calculate dynamic sections and subjects for the selected grade
   const selectedGradeObj = allGrades.find(g => g.name === selectedLoadGrade);
-  let availableSections = selectedGradeObj ? JSON.parse(selectedGradeObj.sections || '[]') : [];
+  let availableSections = selectedGradeObj ? safeJsonParse<string[]>(selectedGradeObj.sections, []) : [];
   
   // Fallback if no sections are configured in Admin yet
   if (selectedLoadGrade && availableSections.length === 0) {
@@ -110,7 +113,7 @@ export default function TeacherProfileTabs({
   let availableSubjects = selectedLoadGrade 
     ? allSubjects
         .filter(sub => {
-          const mappedGrades = JSON.parse(sub.gradeLevels || '[]');
+          const mappedGrades = safeJsonParse<string[]>(sub.gradeLevels, []);
           return mappedGrades.includes(selectedLoadGrade);
         })
         .map(sub => sub.name)
@@ -392,7 +395,7 @@ export default function TeacherProfileTabs({
                     }
                   }
                   window.history.replaceState({}, '', url);
-                  window.location.reload(); 
+                  router.refresh(); 
                 }}
                 defaultValue={typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('term') !== null ? new URLSearchParams(window.location.search).get('term')! : 'default') : 'default'}
                 className="py-2 px-3 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white text-slate-700 font-bold max-w-[200px]"

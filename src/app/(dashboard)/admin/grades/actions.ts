@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { revalidatePath } from 'next/cache';
+import { safeJsonParse } from '@/lib/utils';
 
 export async function addSectionToGrade(gradeId: string, sectionName: string) {
   const session = await getServerSession(authOptions);
@@ -12,7 +13,7 @@ export async function addSectionToGrade(gradeId: string, sectionName: string) {
   const grade = await prisma.gradeLevel.findUnique({ where: { id: gradeId } });
   if (!grade) throw new Error('Grade level not found');
 
-  const currentSections = JSON.parse(grade.sections || '[]');
+  const currentSections = safeJsonParse<string[]>(grade.sections, []);
   if (currentSections.includes(sectionName)) {
     throw new Error('Section already exists in this grade level');
   }
@@ -38,7 +39,7 @@ export async function removeSectionFromGrade(gradeId: string, sectionName: strin
   const grade = await prisma.gradeLevel.findUnique({ where: { id: gradeId } });
   if (!grade) throw new Error('Grade level not found');
 
-  let currentSections = JSON.parse(grade.sections || '[]');
+  let currentSections = safeJsonParse<string[]>(grade.sections, []);
   currentSections = currentSections.filter((s: string) => s !== sectionName);
 
   await prisma.gradeLevel.update({
@@ -60,7 +61,7 @@ export async function addSubjectToGrade(gradeId: string, subjectName: string) {
   const grade = await prisma.gradeLevel.findUnique({ where: { id: gradeId } });
   if (!grade) throw new Error('Grade level not found');
 
-  const currentSubjects = JSON.parse(grade.subjects || '[]');
+  const currentSubjects = safeJsonParse<string[]>(grade.subjects, []);
   if (currentSubjects.includes(subjectName)) {
     throw new Error('Subject already exists in this grade level');
   }
@@ -83,7 +84,7 @@ export async function removeSubjectFromGrade(gradeId: string, subjectName: strin
   const grade = await prisma.gradeLevel.findUnique({ where: { id: gradeId } });
   if (!grade) throw new Error('Grade level not found');
 
-  let currentSubjects = JSON.parse(grade.subjects || '[]');
+  let currentSubjects = safeJsonParse<string[]>(grade.subjects, []);
   currentSubjects = currentSubjects.filter((s: string) => s !== subjectName);
 
   await prisma.gradeLevel.update({

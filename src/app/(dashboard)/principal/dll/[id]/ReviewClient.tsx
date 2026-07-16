@@ -6,6 +6,7 @@ import { ArrowLeft, CheckCircle, AlertTriangle } from 'lucide-react';
 import { reviewLessonLog } from './actions';
 import { useRouter } from 'next/navigation';
 import 'react-quill-new/dist/quill.snow.css';
+import { safeJsonParse } from '@/lib/utils';
 
 export default function ReviewClient({ entry, checklist }: { entry: any, checklist: any[] }) {
   const [remarks, setRemarks] = useState(entry.remarks || "");
@@ -42,7 +43,7 @@ export default function ReviewClient({ entry, checklist }: { entry: any, checkli
     }
   };
 
-  const content = JSON.parse(entry.content || '{}');
+  const content = safeJsonParse<any>(entry.content, {});
 
   return (
     <div className="space-y-6 animate-fadeIn">

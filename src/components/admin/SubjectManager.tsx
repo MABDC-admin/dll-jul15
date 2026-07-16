@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Plus, Edit2, Trash2, X, AlertTriangle, CheckSquare, Square } from 'lucide-react';
 import { createSubject, updateSubject, deleteSubject } from '@/app/(dashboard)/admin/subjects/actions';
 import { useRouter } from 'next/navigation';
+import { safeJsonParse } from '@/lib/utils';
 
 export default function SubjectManager({ 
   initialSubjects, 
@@ -76,7 +77,7 @@ export default function SubjectManager({
       code: subject.code,
       department: subject.department,
       type: subject.type,
-      gradeLevels: JSON.parse(subject.gradeLevels || '[]')
+      gradeLevels: safeJsonParse<string[]>(subject.gradeLevels, [])
     });
     setIsModalOpen(true);
   }
@@ -178,7 +179,7 @@ export default function SubjectManager({
             </thead>
             <tbody className="divide-y divide-slate-100">
               {subjects.map((sub) => {
-                const grades = JSON.parse(sub.gradeLevels || '[]');
+                const grades = safeJsonParse<string[]>(sub.gradeLevels, []);
                 return (
                   <tr key={sub.id} className="hover:bg-slate-50/50 transition">
                     <td className="p-4 font-bold text-slate-800">

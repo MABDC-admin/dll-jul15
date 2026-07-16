@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { Users, FileText, Clock, AlertTriangle, CheckCircle, FileCheck } from 'lucide-react';
 import Link from 'next/link';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { safeJsonParse } from '@/lib/utils';
 
 export default async function PrincipalDashboard() {
   const teachersCount = await prisma.teacherProfile.count();
@@ -105,7 +106,7 @@ export default async function PrincipalDashboard() {
                       <div>
                         <p className="text-xs font-bold text-slate-800">{entry.teacherProfile.user.name}</p>
                         <p className="text-[11px] text-slate-500">
-                          {(JSON.parse(entry.teacherProfile.gradeLevels)[0] || 'Unassigned Grade')} • <span className="font-semibold">{entry.learningArea}</span>
+                          {(safeJsonParse<string[]>(entry.teacherProfile.gradeLevels, [])[0] || 'Unassigned Grade')} • <span className="font-semibold">{entry.learningArea}</span>
                         </p>
                       </div>
                     </div>

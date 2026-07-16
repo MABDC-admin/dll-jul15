@@ -14,5 +14,5 @@ conn.connect({
   host: '167.233.129.213',
   port: 22,
   username: 'root',
-  password: 'Denskie123'
+  password: process.env.DEPLOY_PASS
 });

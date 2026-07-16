@@ -47,11 +47,11 @@ export async function submitAnecdotal(formData: FormData) {
     }
   });
 
-  // Notify Principals
+  // Notify Principals concurrently
   const principals = await prisma.user.findMany({ where: { role: 'PRINCIPAL' } });
   const learner = await prisma.learner.findUnique({ where: { id: learnerId } });
 
-  for (const principal of principals) {
+  await Promise.all(principals.map(async (principal) => {
     const notif = await prisma.notification.create({
       data: {
         userId: principal.id,
@@ -64,7 +64,7 @@ export async function submitAnecdotal(formData: FormData) {
       (global as any).io.to(`USER_${principal.id}`).emit('new-notification', notif);
       (global as any).io.to(`ROLE_PRINCIPAL`).emit('new-notification', notif);
     }
-  }
+  }));
 
   revalidatePath('/teacher/anecdotal');
   revalidatePath('/principal/anecdotal');

@@ -1,7 +1,7 @@
 const { Client } = require('ssh2');
 
 const conn = new Client();
-const config = { host: '167.233.129.213', port: 22, username: 'root', password: 'Denskie123' };
+const config = { host: '167.233.129.213', port: 22, username: 'root', password: process.env.DEPLOY_PASS };
 
 const commands = [
   'cd /var/www/mabdc-portal && git pull origin main',

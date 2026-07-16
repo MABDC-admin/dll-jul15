@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import DLLFilterForm from './DLLFilterForm';
 import { getCurrentTerm } from '@/lib/term';
+import { safeJsonParse } from '@/lib/utils';
 
 export default async function DDLReviewPage({
   searchParams,
@@ -78,7 +79,7 @@ export default async function DDLReviewPage({
                   <div className="text-[10px] text-slate-400 font-mono font-normal mt-0.5">ID: {e.id.slice(0, 8)}</div>
                 </td>
                 <td className="py-3.5 px-4 text-slate-600">
-                  {(JSON.parse(e.teacherProfile.gradeLevels)[0] || 'Unassigned')} - {(JSON.parse(e.teacherProfile.sections)[0] || 'Unassigned')}
+                  {(safeJsonParse<string[]>(e.teacherProfile.gradeLevels, [])[0] || 'Unassigned')} - {(safeJsonParse<string[]>(e.teacherProfile.sections, [])[0] || 'Unassigned')}
                 </td>
                 <td className="py-3.5 px-4 font-semibold text-indigo-600">{e.learningArea}</td>
                 <td className="py-3.5 px-4">

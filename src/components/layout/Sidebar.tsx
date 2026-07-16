@@ -49,12 +49,20 @@ export default function Sidebar({ role }: SidebarProps) {
   const [pendingAnecdotalCount, setPendingAnecdotalCount] = useState(0);
 
   useEffect(() => {
+    let interval: NodeJS.Timeout;
     if (role === 'PRINCIPAL') {
-      fetch('/api/anecdotal-count')
-        .then(res => res.json())
-        .then(data => setPendingAnecdotalCount(data.count || 0))
-        .catch(() => {});
+      const fetchCount = () => {
+        fetch('/api/anecdotal-count')
+          .then(res => res.json())
+          .then(data => setPendingAnecdotalCount(data.count || 0))
+          .catch(() => {});
+      };
+      fetchCount();
+      interval = setInterval(fetchCount, 30000); // refresh every 30s
     }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [role]);
 
   const navItems: Record<string, SidebarItem[]> = {
@@ -73,7 +81,7 @@ export default function Sidebar({ role }: SidebarProps) {
       { id: 'ddlReview', label: 'DDL Review', href: '/principal/dll', icon: FileCheck },
       { id: 'anecdotalReview', label: 'Anecdotal Review', href: '/principal/anecdotal', icon: AlertTriangle, badge: pendingAnecdotalCount },
       { id: 'calendar', label: 'School Calendar', href: '/principal/calendar', icon: CalendarDays },
-      { id: 'announcements', label: 'Announcements', href: '/principal/announcements', icon: Bell },
+      { id: 'announcements', label: 'Announcements', href: '/principal/announcements', icon: Bell, badge: unreadCount },
       { id: 'teachers', label: 'Teachers Directory', href: '/principal/teachers', icon: Users },
       { id: 'learners', label: 'Learner\'s Directory', href: '/principal/learners', icon: GraduationCap },
       { id: 'deptManagement', label: 'Departments & Load', href: '/principal/departments', icon: Layers },
@@ -89,7 +97,7 @@ export default function Sidebar({ role }: SidebarProps) {
       { id: 'dllCreator', label: 'Create / Submit DLL', href: '/teacher/dll/create', icon: FilePlus2 },
       { id: 'mySubmissions', label: 'My Submissions', href: '/teacher/dll', icon: FileText },
       { id: 'anecdotal', label: 'Anecdotal Records', href: '/teacher/anecdotal', icon: ClipboardList },
-      { id: 'announcements', label: 'Announcements', href: '/teacher/announcements', icon: Bell }
+      { id: 'announcements', label: 'Announcements', href: '/teacher/announcements', icon: Bell, badge: unreadCount }
     ],
   };
 

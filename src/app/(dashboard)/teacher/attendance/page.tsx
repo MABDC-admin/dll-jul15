@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
 import AttendanceLog from './AttendanceLog';
 import { UserCheck } from 'lucide-react';
+import { safeJsonParse } from '@/lib/utils';
 
 export default async function AttendancePage() {
   const session = await getServerSession(authOptions);
@@ -22,8 +23,8 @@ export default async function AttendancePage() {
   }
 
   // Parse assigned classes
-  const assignedGrades = JSON.parse(user.teacherProfile.gradeLevels || '[]');
-  const assignedSections = JSON.parse(user.teacherProfile.sections || '[]');
+  const assignedGrades = safeJsonParse<string[]>(user.teacherProfile.gradeLevels, []);
+  const assignedSections = safeJsonParse<string[]>(user.teacherProfile.sections, []);
 
   // Fetch only learners that belong to the teacher's assigned classes
   const learners = await prisma.learner.findMany({

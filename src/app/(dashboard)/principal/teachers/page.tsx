@@ -41,10 +41,22 @@ export default async function TeachersDirectory() {
 
     // 2. Sort by Lowest Grade Level
     const getLowestGrade = (teacher: any) => {
-      if (!teacher.subjectLoads || teacher.subjectLoads.length === 0) return 999;
-      const levels = teacher.subjectLoads.map((load: any) => {
-        return gradeLevelMap.get(load.gradeId) ?? gradeNameMap.get(load.gradeId) ?? 999;
-      });
+      const levels: number[] = [];
+      if (teacher.subjectLoads && teacher.subjectLoads.length > 0) {
+        teacher.subjectLoads.forEach((load: any) => {
+          levels.push(gradeLevelMap.get(load.gradeId) ?? gradeNameMap.get(load.gradeId) ?? 999);
+        });
+      } else {
+        try {
+          const grades = JSON.parse(teacher.gradeLevels || '[]');
+          grades.forEach((g: string) => {
+            levels.push(gradeNameMap.get(g) ?? 999);
+          });
+        } catch {
+          // ignore
+        }
+      }
+      if (levels.length === 0) return 999;
       return Math.min(...levels);
     };
 

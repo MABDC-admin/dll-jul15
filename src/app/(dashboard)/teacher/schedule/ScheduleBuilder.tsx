@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { addScheduleBlock, removeScheduleBlock } from './actions';
 import { Plus, Trash2, Calendar, Clock, BookOpen, Users } from 'lucide-react';
+import { safeJsonParse } from '@/lib/utils';
 
 type Schedule = {
   id: string;
@@ -25,9 +26,9 @@ type TeacherProfile = {
 export default function ScheduleBuilder({ schedules, profile }: { schedules: Schedule[], profile: TeacherProfile }) {
   const [isPending, setIsPending] = useState(false);
 
-  const gradeLevels = JSON.parse(profile.gradeLevels || '[]');
-  const sections = JSON.parse(profile.sections || '[]');
-  const subjects = JSON.parse(profile.subjects || '[]');
+  const gradeLevels = safeJsonParse<string[]>(profile.gradeLevels, []);
+  const sections = safeJsonParse<string[]>(profile.sections, []);
+  const subjects = safeJsonParse<string[]>(profile.subjects, []);
 
   const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
