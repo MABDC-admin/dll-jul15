@@ -55,3 +55,18 @@ export async function removeTeacherScheduleBlock(id: string, teacherProfileId: s
   revalidatePath(`/principal/teachers/${teacherProfileId}`);
   return { success: true };
 }
+
+export async function updateTeacherAvatar(teacherProfileId: string, avatarUrl: string) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user || (session.user.role !== 'PRINCIPAL' && session.user.role !== 'ADMIN')) {
+    throw new Error('Unauthorized');
+  }
+
+  await prisma.teacherProfile.update({
+    where: { id: teacherProfileId },
+    data: { avatar: avatarUrl }
+  });
+
+  revalidatePath(`/principal/teachers/${teacherProfileId}`);
+  return { success: true };
+}

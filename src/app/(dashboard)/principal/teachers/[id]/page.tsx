@@ -5,6 +5,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import TeacherProfileTabs from './TeacherProfileTabs';
+import AvatarUpload from './AvatarUpload';
 import { getCurrentTerm } from '@/lib/term';
 
 export default async function TeacherDetailsPage({ 
@@ -69,7 +70,11 @@ export default async function TeacherDetailsPage({
           <ChevronLeft className="w-4 h-4" /> Back to Teachers Directory
         </Link>
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-6">
-          <img src={teacher.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.user.name)}&background=random`} alt={teacher.user.name} className="w-20 h-20 rounded-full object-cover ring-4 ring-indigo-50" />
+          <AvatarUpload 
+            teacherProfileId={teacher.id} 
+            currentAvatar={teacher.avatar} 
+            teacherName={teacher.user.name} 
+          />
           <div>
             <h2 className="text-2xl font-black text-slate-800">{teacher.user.name}</h2>
             <p className="text-sm font-semibold text-slate-500">{teacher.department || 'Unassigned Department'}</p>
