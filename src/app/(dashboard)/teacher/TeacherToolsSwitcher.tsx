@@ -14,7 +14,7 @@ interface Subject {
   id: string;
   name: string;
   code: string;
-  targetBand: string;
+  gradeLevels: string;
 }
 
 export default function TeacherToolsSwitcher({ grades, subjects }: { grades: Grade[], subjects: Subject[] }) {

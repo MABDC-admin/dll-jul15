@@ -163,7 +163,7 @@ export default function UpdateAssignmentModal({ teachers, allGrades, allSubjects
                             />
                             <div className="flex flex-col">
                               <span className="font-bold text-slate-800">{s.name}</span>
-                              <span className="text-[10px] text-slate-500 font-mono">{s.code} • {s.targetBand}</span>
+                            <span className="text-[10px] text-slate-500 font-mono">{s.code}</span>
                             </div>
                           </label>
                         ))}
