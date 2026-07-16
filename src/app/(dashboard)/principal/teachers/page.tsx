@@ -22,8 +22,23 @@ export default async function TeachersDirectory() {
   // Fallback map just in case subjectLoads uses the name instead of id
   const gradeNameMap = new Map(allGrades.map(g => [g.name, g.level]));
 
-  // Sort teachers by their lowest grade level assigned
+  // Sort teachers by Department first, then Grade Level, then alphabetically
+  const deptOrder: Record<string, number> = {
+    'Pre-School Department': 1,
+    'Elementary Department': 2,
+    'Junior High School Department': 3,
+    'Senior High School Department': 4,
+  };
+
   const sortedTeachers = teachers.sort((a, b) => {
+    // 1. Sort by Department
+    const rankA = deptOrder[a.department] || 99;
+    const rankB = deptOrder[b.department] || 99;
+    if (rankA !== rankB) {
+      return rankA - rankB;
+    }
+
+    // 2. Sort by Lowest Grade Level
     const getLowestGrade = (teacher: any) => {
       if (!teacher.subjectLoads || teacher.subjectLoads.length === 0) return 999;
       const levels = teacher.subjectLoads.map((load: any) => {
@@ -36,10 +51,10 @@ export default async function TeachersDirectory() {
     const levelB = getLowestGrade(b);
 
     if (levelA !== levelB) {
-      return levelA - levelB; // Sort ascending by grade level
+      return levelA - levelB;
     }
     
-    // If they have the same grade level, sort alphabetically by name
+    // 3. Sort alphabetically by name
     return a.user.name.localeCompare(b.user.name);
   });
 
