@@ -34,14 +34,20 @@ export default function DepartmentAssignmentManager({
 
   useEffect(() => {
     if (selectedTeacher) {
-      try {
-        setCheckedGrades(JSON.parse(selectedTeacher.gradeLevels || '[]'));
-        setCheckedSubjects(JSON.parse(selectedTeacher.subjects || '[]'));
-        setCheckedSections(JSON.parse(selectedTeacher.sections || '[]'));
-      } catch {
-        setCheckedGrades([]);
-        setCheckedSubjects([]);
-        setCheckedSections([]);
+      if (selectedTeacher.subjectLoads && selectedTeacher.subjectLoads.length > 0) {
+        setCheckedGrades(Array.from(new Set(selectedTeacher.subjectLoads.map((l: any) => l.gradeId))));
+        setCheckedSubjects(Array.from(new Set(selectedTeacher.subjectLoads.map((l: any) => l.subjectName))));
+        setCheckedSections(Array.from(new Set(selectedTeacher.subjectLoads.map((l: any) => l.sectionName))));
+      } else {
+        try {
+          setCheckedGrades(JSON.parse(selectedTeacher.gradeLevels || '[]'));
+          setCheckedSubjects(JSON.parse(selectedTeacher.subjects || '[]'));
+          setCheckedSections(JSON.parse(selectedTeacher.sections || '[]'));
+        } catch {
+          setCheckedGrades([]);
+          setCheckedSubjects([]);
+          setCheckedSections([]);
+        }
       }
     } else {
       setCheckedGrades([]);
@@ -144,21 +150,21 @@ export default function DepartmentAssignmentManager({
                   </td>
                   <td className="p-4 text-slate-500">
                     <div className="flex flex-wrap gap-1">
-                      {JSON.parse(t.gradeLevels || '[]').map((g: string, i: number) => (
+                      {(t.subjectLoads && t.subjectLoads.length > 0 ? Array.from(new Set(t.subjectLoads.map((l: any) => l.gradeId))) : JSON.parse(t.gradeLevels || '[]')).map((g: string, i: number) => (
                         <span key={i} className="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-bold">{g}</span>
                       ))}
                     </div>
                   </td>
                   <td className="p-4 text-slate-500">
                     <div className="flex flex-wrap gap-1">
-                      {JSON.parse(t.sections || '[]').map((s: string, i: number) => (
+                      {(t.subjectLoads && t.subjectLoads.length > 0 ? Array.from(new Set(t.subjectLoads.map((l: any) => l.sectionName))) : JSON.parse(t.sections || '[]')).map((s: string, i: number) => (
                         <span key={i} className="bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded text-[10px] font-bold">{s}</span>
                       ))}
                     </div>
                   </td>
                   <td className="p-4 text-slate-500">
                     <div className="flex flex-wrap gap-1">
-                      {JSON.parse(t.subjects || '[]').map((sub: string, i: number) => (
+                      {(t.subjectLoads && t.subjectLoads.length > 0 ? Array.from(new Set(t.subjectLoads.map((l: any) => l.subjectName))) : JSON.parse(t.subjects || '[]')).map((sub: string, i: number) => (
                         <span key={i} className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-2 py-0.5 rounded text-[10px] font-bold">{sub}</span>
                       ))}
                     </div>

@@ -26,7 +26,7 @@ export default async function DepartmentLoadsPage({ params }: { params: Promise<
   // Find all teachers assigned to this department
   const teachers = await prisma.teacherProfile.findMany({
     where: { department: department.name },
-    include: { user: true }
+    include: { user: true, subjectLoads: true }
   });
 
   const unassignedTeachers = await prisma.teacherProfile.findMany({
