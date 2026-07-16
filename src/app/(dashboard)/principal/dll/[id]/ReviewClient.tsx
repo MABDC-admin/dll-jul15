@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, CheckCircle, AlertTriangle } from 'lucide-react';
 import { reviewLessonLog } from './actions';
 import { useRouter } from 'next/navigation';
+import 'react-quill-new/dist/quill.snow.css';
 
 export default function ReviewClient({ entry, checklist }: { entry: any, checklist: any[] }) {
   const [remarks, setRemarks] = useState(entry.remarks || "");
@@ -60,7 +61,13 @@ export default function ReviewClient({ entry, checklist }: { entry: any, checkli
           <h4 className="text-xs font-extrabold uppercase text-indigo-600">Daily Lesson Plan Preview</h4>
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs leading-relaxed space-y-3 text-slate-700">
             <p><span className="font-bold text-slate-900">Teaching Date:</span> {entry.teachingDates}</p>
-            <p><span className="font-bold text-slate-900">Topic / Lesson:</span> {content.topic}</p>
+            <div className="ql-snow">
+              <span className="font-bold text-slate-900 mb-2 block">Topic / Lesson:</span>
+              <div 
+                className="bg-white p-4 rounded border border-slate-200 text-slate-700 font-sans ql-editor max-h-96 overflow-y-auto"
+                dangerouslySetInnerHTML={{ __html: content.topic || "No content provided." }}
+              />
+            </div>
             <p><span className="font-bold text-slate-900">Teacher Remarks:</span> {content.remarks || "None"}</p>
           </div>
         </div>
@@ -87,7 +94,7 @@ export default function ReviewClient({ entry, checklist }: { entry: any, checkli
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <label className="block text-xs font-bold text-slate-700">Principal Remarks / Comments</label>
+            <label className="block text-xs font-bold text-slate-700">Academic Director Remarks / Comments</label>
             <textarea 
               rows={3} 
               placeholder="State suggestions or review commentary..."

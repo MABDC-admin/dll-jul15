@@ -20,7 +20,7 @@ export default async function LearnersDirectoryPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="w-full">
       <LearnerManager learners={learners} grades={grades} />
     </div>
   );

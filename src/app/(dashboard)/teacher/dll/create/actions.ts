@@ -24,8 +24,10 @@ export async function submitDLL(formData: FormData) {
   const subject = formData.get('subject') as string;
   const topic = formData.get('topic') as string;
   const remarks = formData.get('remarks') as string;
+  const term = formData.get('term') as string;
+  const weekNumber = formData.get('weekNumber') as string;
 
-  if (!date || !subject || !topic) {
+  if (!date || !subject || !topic || !term || !weekNumber) {
     throw new Error('Missing required fields');
   }
 
@@ -34,7 +36,7 @@ export async function submitDLL(formData: FormData) {
     remarks
   });
 
-  await prisma.lessonLog.create({
+  const log = await prisma.lessonLog.create({
     data: {
       teacherProfileId: user.teacherProfile.id,
       learningArea: subject,
@@ -43,8 +45,8 @@ export async function submitDLL(formData: FormData) {
       originalFilename: 'Online Submission',
       fileVersion: '1.0',
       schoolYear: '2026-2027',
-      term: '1st Quarter',
-      weekNumber: '1',
+      term: term,
+      weekNumber: weekNumber,
       timeliness: 'On-time',
       remarks: remarks || "",
       content
@@ -56,7 +58,24 @@ export async function submitDLL(formData: FormData) {
     data: { totalSubmitted: { increment: 1 } }
   });
 
+  // Notify Principals
+  const principals = await prisma.user.findMany({ where: { role: 'PRINCIPAL' } });
+  for (const principal of principals) {
+    const notif = await prisma.notification.create({
+      data: {
+        userId: principal.id,
+        message: `${user.name} submitted a new Lesson Log for ${subject}.`,
+        link: `/principal/dll/${log.id}`
+      }
+    });
+    if ((global as any).io) {
+      (global as any).io.to(`USER_${principal.id}`).emit('new-notification', notif);
+      (global as any).io.to(`ROLE_PRINCIPAL`).emit('new-notification', notif);
+    }
+  }
+
   revalidatePath('/principal/dll');
+  revalidatePath('/principal');
   revalidatePath('/teacher/dll');
   revalidatePath('/teacher');
 

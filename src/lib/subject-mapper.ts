@@ -1,19 +1,40 @@
 export function getValidSubjectsForGrade(gradeName: string, allSubjects: any[]) {
   if (!gradeName) return [];
 
-  let validBands: string[] = [];
+  const allowList = (names: string[]) => allSubjects.filter(s => names.includes(s.name));
 
   if (gradeName === 'Kindergarten 1' || gradeName === 'Kindergarten 2') {
-    validBands = ['Kindergarten'];
-  } else if (gradeName === 'Grade 1' || gradeName === 'Grade 2' || gradeName === 'Grade 3') {
-    validBands = ['Grades 1-3'];
-  } else if (gradeName === 'Grade 4' || gradeName === 'Grade 5') {
-    validBands = ['Grades 4-6', 'Grades 4-5'];
-  } else if (gradeName === 'Grade 6') {
-    validBands = ['Grades 4-6', 'Grade 6'];
-  } else if (gradeName === 'Grade 7' || gradeName === 'Grade 8' || gradeName === 'Grade 9' || gradeName === 'Grade 10') {
-    validBands = ['Grades 7-10'];
+    return allowList([
+      'Socio-emotional Development',
+      'Values Development',
+      'Aesthetic/Creative Development',
+      'Physical Health and Motor Development',
+      'Language, Literacy, and Communication',
+      'Mathematics (Kinder)',
+      'Understanding the Physical and Natural Environment'
+    ]);
+  } 
+  
+  if (gradeName === 'Grade 1') {
+    return allowList(['Language', 'Reading and Literacy', 'Mathematics', 'Makabansa', 'GMRC']);
+  } 
+
+  if (gradeName === 'Grade 2') {
+    return allowList(['Filipino', 'English', 'Mathematics', 'Makabansa', 'GMRC']);
   }
 
-  return allSubjects.filter(s => validBands.includes(s.targetBand));
+  if (gradeName === 'Grade 3') {
+    return allowList(['Filipino', 'English', 'Mathematics', 'Science', 'Makabansa', 'GMRC']);
+  }
+
+  if (gradeName === 'Grade 4' || gradeName === 'Grade 5' || gradeName === 'Grade 6') {
+    return allowList(['Filipino', 'English', 'Mathematics', 'Science', 'Araling Panlipunan', 'GMRC', 'MAPEH', 'EPP / TLE']);
+  }
+
+  if (gradeName === 'Grade 7' || gradeName === 'Grade 8' || gradeName === 'Grade 9' || gradeName === 'Grade 10') {
+    return allowList(['Filipino', 'English', 'Mathematics', 'Science', 'Araling Panlipunan', 'Values Education', 'MAPEH', 'EPP / TLE']);
+  }
+  
+  // For Senior High School, they have specialized subjects, but we allow all core subjects for now
+  return allSubjects;
 }

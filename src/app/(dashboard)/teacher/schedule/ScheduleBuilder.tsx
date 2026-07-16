@@ -72,7 +72,7 @@ export default function ScheduleBuilder({ schedules, profile }: { schedules: Sch
         
         {(!gradeLevels.length || !sections.length || !subjects.length) ? (
           <div className="p-4 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-sm font-semibold">
-            You cannot build a schedule until the Principal assigns you Grade Levels, Sections, and Subjects.
+            You cannot build a schedule until the Academic Director assigns you Grade Levels, Sections, and Subjects.
           </div>
         ) : (
           <form action={handleAdd} className="grid grid-cols-1 md:grid-cols-3 gap-4">

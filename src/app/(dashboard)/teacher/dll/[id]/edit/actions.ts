@@ -23,15 +23,20 @@ export async function resubmitDLL(formData: FormData) {
 
   const logId = formData.get('logId') as string;
   const learningArea = formData.get('learningArea') as string;
-  const teachingDateStr = formData.get('teachingDate') as string;
+  const teachingDate = formData.get('teachingDate') as string;
   const topic = formData.get('topic') as string;
   const remarks = formData.get('remarks') as string;
+  const term = formData.get('term') as string;
+  const weekNumber = formData.get('weekNumber') as string;
 
-  if (!logId || !learningArea || !teachingDateStr || !topic) {
-    throw new Error('Missing required fields');
+  if (!logId || !learningArea || !teachingDate || !topic || !term || !weekNumber) {
+    throw new Error("Missing required fields");
   }
 
-  const teachingDate = new Date(teachingDateStr);
+  const content = JSON.stringify({
+    topic,
+    remarks
+  });
 
   // Validate ownership and status
   const existingLog = await prisma.lessonLog.findUnique({
@@ -55,7 +60,9 @@ export async function resubmitDLL(formData: FormData) {
     where: { id: logId },
     data: {
       learningArea,
-      teachingDates: teachingDate.toISOString(),
+      teachingDates: new Date(teachingDate).toISOString(),
+      term,
+      weekNumber,
       submittedDate: new Date(),
       status: 'Pending Review',
       content: JSON.stringify({
@@ -67,8 +74,25 @@ export async function resubmitDLL(formData: FormData) {
     }
   });
 
+  // Notify Principals
+  const principals = await prisma.user.findMany({ where: { role: 'PRINCIPAL' } });
+  for (const principal of principals) {
+    const notif = await prisma.notification.create({
+      data: {
+        userId: principal.id,
+        message: `${user.name} resubmitted a revised Lesson Log for ${learningArea}.`,
+        link: `/principal/dll/${logId}`
+      }
+    });
+    if ((global as any).io) {
+      (global as any).io.to(`USER_${principal.id}`).emit('new-notification', notif);
+      (global as any).io.to(`ROLE_PRINCIPAL`).emit('new-notification', notif);
+    }
+  }
+
   revalidatePath('/teacher/dll');
   revalidatePath('/principal/dll');
+  revalidatePath('/principal');
   
   return { success: true };
 }

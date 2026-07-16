@@ -1,6 +1,7 @@
 'use client';
 import { Award, Bell, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import NotificationBell from './NotificationBell';
 
 export default function Header() {
   const { data: session } = useSession();
@@ -20,10 +21,11 @@ export default function Header() {
       </div>
 
       <div className="flex items-center space-x-4">
+        <NotificationBell />
         <div className="text-right hidden xl:block">
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">MABDC Operations</span>
           <p className="text-xs font-bold text-slate-800">
-            Logged in: {session?.user?.name} ({session?.user?.role})
+            Logged in: {session?.user?.name} ({(session?.user as any)?.role})
           </p>
         </div>
       </div>

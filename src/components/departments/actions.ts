@@ -77,3 +77,33 @@ export async function deleteDepartment(id: string) {
   revalidatePath('/principal/assignments');
   return { success: true };
 }
+
+export async function assignTeacherToDepartment(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session || !session.user || session.user.role !== 'PRINCIPAL') {
+    throw new Error('Unauthorized');
+  }
+
+  const teacherProfileId = formData.get('teacherProfileId') as string;
+  const departmentName = formData.get('departmentName') as string;
+
+  if (!teacherProfileId || !departmentName) {
+    throw new Error('Teacher Profile ID and Department Name are required');
+  }
+
+  await prisma.teacherProfile.update({
+    where: { id: teacherProfileId },
+    data: {
+      department: departmentName,
+      // Reset loads since they moved departments
+      gradeLevels: "[]",
+      sections: "[]",
+      subjects: "[]"
+    }
+  });
+
+  revalidatePath('/principal/departments');
+  revalidatePath('/principal/assignments');
+  return { success: true };
+}

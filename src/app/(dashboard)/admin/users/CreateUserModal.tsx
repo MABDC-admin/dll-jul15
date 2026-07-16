@@ -51,7 +51,7 @@ export default function CreateUserModal() {
                 <label className="block text-slate-500 font-bold mb-1">Role</label>
                 <select required name="role" className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg outline-none">
                   <option value="TEACHER">Teacher</option>
-                  <option value="PRINCIPAL">Principal</option>
+                  <option value="PRINCIPAL">Academic Director</option>
                   <option value="ADMIN">System Admin</option>
                 </select>
               </div>

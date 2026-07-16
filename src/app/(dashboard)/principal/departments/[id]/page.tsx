@@ -6,15 +6,17 @@ import DepartmentAssignmentManager from '@/components/departments/DepartmentAssi
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 
-export default async function DepartmentLoadsPage({ params }: { params: { id: string } }) {
+export default async function DepartmentLoadsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   
   if (!session || !session.user || session.user.role !== 'PRINCIPAL') {
     redirect('/login');
   }
 
+  const { id } = await params;
+
   const department = await prisma.department.findUnique({
-    where: { id: params.id }
+    where: { id }
   });
 
   if (!department) {
@@ -27,11 +29,18 @@ export default async function DepartmentLoadsPage({ params }: { params: { id: st
     include: { user: true }
   });
 
+  const unassignedTeachers = await prisma.teacherProfile.findMany({
+    where: {
+      department: { not: department.name }
+    },
+    include: { user: true }
+  });
+
   const grades = await prisma.gradeLevel.findMany({ orderBy: { level: 'asc' } });
   const subjects = await prisma.subject.findMany({ orderBy: { name: 'asc' } });
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       <Link href="/principal/departments" className="text-sm font-bold text-slate-500 hover:text-indigo-600 transition flex items-center gap-1 w-fit">
         <ChevronLeft className="w-4 h-4" /> Back to Departments
       </Link>
@@ -43,6 +52,7 @@ export default async function DepartmentLoadsPage({ params }: { params: { id: st
 
       <DepartmentAssignmentManager 
         teachers={teachers} 
+        unassignedTeachers={unassignedTeachers}
         allGrades={grades} 
         allSubjects={subjects} 
         departmentName={department.name} 

@@ -16,7 +16,7 @@ export default async function AdminDepartmentsPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="w-full">
       <DepartmentManager departments={departments} />
     </div>
   );

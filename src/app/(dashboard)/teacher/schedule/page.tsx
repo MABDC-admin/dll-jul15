@@ -27,7 +27,7 @@ export default async function TeacherSchedulePage() {
   });
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-fadeIn">
+    <div className="w-full space-y-6 animate-fadeIn">
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
         <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 shadow-inner">
           <CalendarDays className="w-6 h-6" />

@@ -16,7 +16,20 @@ export default async function DLLListPage() {
     where: { id: session.user.id },
     include: {
       teacherProfile: {
-        include: { lessonLogs: { orderBy: { submittedDate: 'desc' } } }
+        include: { 
+          lessonLogs: { 
+            select: {
+              id: true,
+              learningArea: true,
+              term: true,
+              weekNumber: true,
+              submittedDate: true,
+              status: true,
+              remarks: true
+            },
+            orderBy: { submittedDate: 'desc' } 
+          } 
+        }
       }
     }
   });

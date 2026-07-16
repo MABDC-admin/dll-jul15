@@ -19,9 +19,16 @@ import {
   FilePlus2,
   FileText,
   Award,
-  LogOut
+  LogOut,
+  AlertTriangle,
+  Bell,
+  Menu,
+  X
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
+import { useState } from 'react';
+
+import { useSocket } from '@/providers/SocketProvider';
 
 interface SidebarItem {
   id: string;
@@ -37,6 +44,8 @@ interface SidebarProps {
 
 export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
+  const { unreadCount } = useSocket();
+  const [isOpen, setIsOpen] = useState(false);
 
   const navItems: Record<string, SidebarItem[]> = {
     ADMIN: [
@@ -50,7 +59,11 @@ export default function Sidebar({ role }: SidebarProps) {
     ],
     PRINCIPAL: [
       { id: 'dashboard', label: 'Dashboard', href: '/principal', icon: BookOpen },
-      { id: 'ddlReview', label: 'DDL Review', href: '/principal/dll', icon: FileCheck, badge: 2 },
+      { id: 'tracker', label: 'Weekly Tracker', href: '/principal/tracker', icon: ClipboardList },
+      { id: 'ddlReview', label: 'DDL Review', href: '/principal/dll', icon: FileCheck },
+      { id: 'anecdotalReview', label: 'Anecdotal Review', href: '/principal/anecdotal', icon: AlertTriangle },
+      { id: 'calendar', label: 'School Calendar', href: '/principal/calendar', icon: CalendarDays },
+      { id: 'announcements', label: 'Announcements', href: '/principal/announcements', icon: Bell },
       { id: 'teachers', label: 'Teachers Directory', href: '/principal/teachers', icon: Users },
       { id: 'learners', label: 'Learner\'s Directory', href: '/principal/learners', icon: GraduationCap },
       { id: 'deptManagement', label: 'Departments & Load', href: '/principal/departments', icon: Layers },
@@ -58,19 +71,23 @@ export default function Sidebar({ role }: SidebarProps) {
     ],
     TEACHER: [
       { id: 'teacherDashboard', label: 'My Dashboard', href: '/teacher', icon: BookOpen },
+      { id: 'teacherLoad', label: 'My Subject Load', href: '/teacher/load', icon: BookMarked },
       { id: 'attendance', label: 'Daily Attendance Log', href: '/teacher/attendance', icon: ClipboardList },
       { id: 'learners', label: 'My Learners List', href: '/teacher/learners', icon: GraduationCap },
+      { id: 'calendar', label: 'School Calendar', href: '/teacher/calendar', icon: CalendarDays },
       { id: 'scheduleBuilder', label: 'Class Schedules', href: '/teacher/schedule', icon: CalendarDays },
       { id: 'dllCreator', label: 'Create / Submit DLL', href: '/teacher/dll/create', icon: FilePlus2 },
-      { id: 'mySubmissions', label: 'My Submissions', href: '/teacher/dll', icon: FileText }
+      { id: 'mySubmissions', label: 'My Submissions', href: '/teacher/dll', icon: FileText },
+      { id: 'anecdotal', label: 'Anecdotal Records', href: '/teacher/anecdotal', icon: ClipboardList },
+      { id: 'announcements', label: 'Announcements', href: '/teacher/announcements', icon: Bell }
     ],
   };
 
   const items = navItems[role] || [];
 
   return (
-    <aside className="w-full md:w-64 bg-slate-900 text-slate-100 flex-shrink-0 flex flex-col border-r border-slate-800 h-screen sticky top-0">
-      <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+    <aside className="w-full md:w-64 bg-slate-900 text-slate-100 flex-shrink-0 flex flex-col border-b md:border-b-0 md:border-r border-slate-800 md:h-screen md:sticky md:top-0 z-20">
+      <div className="p-4 md:p-5 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-white shadow-lg animate-pulse">
             <Award className="w-6 h-6" />
@@ -80,11 +97,19 @@ export default function Sidebar({ role }: SidebarProps) {
             <span className="text-[10px] text-indigo-400 font-medium">Operations Center</span>
           </div>
         </div>
+        <button 
+          className="md:hidden p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white transition" 
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
+
+      <div className={`${isOpen ? 'flex' : 'hidden'} md:flex flex-col flex-1 overflow-hidden`}>
 
       <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
         {items.map((item) => {
-          const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href.length > 8);
+          const isActive = pathname ? (pathname === item.href || (pathname.startsWith(item.href) && item.href.length > 8)) : false;
           const Icon = item.icon;
           return (
             <Link
@@ -122,6 +147,7 @@ export default function Sidebar({ role }: SidebarProps) {
           <LogOut className="w-4 h-4" />
           <span>Sign Out</span>
         </button>
+      </div>
       </div>
     </aside>
   );

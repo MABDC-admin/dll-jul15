@@ -1,54 +1,77 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { BookMarked, Plus } from 'lucide-react';
+import SubjectManager from '@/components/admin/SubjectManager';
+import { BookOpen } from 'lucide-react';
 
-export default async function SubjectsPage() {
-  const subjects = await prisma.subject.findMany({
-    orderBy: { name: 'asc' }
+export default async function SubjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; search?: string; type?: string }>;
+}) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user || session.user.role !== 'ADMIN') {
+    redirect('/login');
+  }
+
+  const resolvedSearchParams = await searchParams;
+  const page = parseInt(resolvedSearchParams?.page || '1');
+  const search = resolvedSearchParams?.search || '';
+  const typeFilter = resolvedSearchParams?.type || '';
+  const limit = 50;
+  const skip = (page - 1) * limit;
+
+  const whereCondition: any = {};
+  if (search) {
+    whereCondition.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { code: { contains: search, mode: 'insensitive' } }
+    ];
+  }
+  if (typeFilter) {
+    whereCondition.type = typeFilter;
+  }
+
+  const [subjects, total] = await Promise.all([
+    prisma.subject.findMany({
+      where: whereCondition,
+      orderBy: [
+        { type: 'asc' },
+        { name: 'asc' }
+      ],
+      skip,
+      take: limit
+    }),
+    prisma.subject.count({ where: whereCondition })
+  ]);
+
+  const allGrades = await prisma.gradeLevel.findMany({
+    orderBy: { level: 'asc' }
   });
 
-  return (
-    <div className="space-y-6 animate-fadeIn">
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div className="flex items-center space-x-3">
-            <BookMarked className="w-5 h-5 text-slate-600" />
-            <div>
-              <h3 className="text-sm font-bold text-slate-800">Learning Subjects Management</h3>
-              <p className="text-xs text-slate-400">Map official learning areas and coding.</p>
-            </div>
-          </div>
-          <button className="bg-slate-800 text-white hover:bg-slate-900 px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Add Subject
-          </button>
-        </div>
+  const totalPages = Math.ceil(total / limit);
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {subjects.map((s) => (
-            <div key={s.id} className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-800">{s.name}</h4>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{s.code} • {s.department}</p>
-                </div>
-                <button className="text-[10px] text-indigo-600 font-bold hover:underline">Edit</button>
-              </div>
-              <div className="pt-2 flex items-center space-x-2 text-xs">
-                <span className="bg-white border border-slate-200 px-2 py-1 rounded text-slate-600 font-semibold text-[10px]">
-                  Type: {s.type}
-                </span>
-                <span className="bg-white border border-slate-200 px-2 py-1 rounded text-slate-600 font-semibold text-[10px]">
-                  Band: {s.targetBand}
-                </span>
-              </div>
-            </div>
-          ))}
-          {subjects.length === 0 && (
-            <div className="col-span-3 text-center py-10 text-slate-500 text-sm">
-              No Subjects configured.
-            </div>
-          )}
+  return (
+    <div className="w-full space-y-6 animate-fadeIn">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+            <BookOpen className="w-6 h-6 text-indigo-600" /> Standard Subjects
+          </h1>
+          <p className="text-sm text-slate-500 font-medium mt-1">Manage the centralized curriculum and its strict Grade Level mappings.</p>
         </div>
       </div>
+
+      <SubjectManager 
+        initialSubjects={subjects} 
+        allGrades={allGrades}
+        currentPage={page}
+        totalPages={totalPages}
+        searchQuery={search}
+        typeFilter={typeFilter}
+      />
     </div>
   );
 }

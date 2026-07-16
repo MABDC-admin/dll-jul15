@@ -2,24 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Edit3, X } from 'lucide-react';
+import { Edit3, X, UserPlus } from 'lucide-react';
 import { updateTeacherAssignment } from '@/app/(dashboard)/principal/assignments/actions';
+import { assignTeacherToDepartment } from './actions';
 import { getValidSubjectsForGrade } from '@/lib/subject-mapper';
 
 export default function DepartmentAssignmentManager({ 
   teachers, 
+  unassignedTeachers,
   allGrades, 
   allSubjects, 
   departmentName 
 }: { 
   teachers: any[], 
+  unassignedTeachers: any[],
   allGrades: any[], 
   allSubjects: any[], 
   departmentName: string 
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [selectedTeacherId, setSelectedTeacherId] = useState('');
+  const [newTeacherId, setNewTeacherId] = useState('');
   
   const [checkedGrades, setCheckedGrades] = useState<string[]>([]);
   const [checkedSubjects, setCheckedSubjects] = useState<string[]>([]);
@@ -66,7 +71,7 @@ export default function DepartmentAssignmentManager({
     formData.set('gradeLevels', checkedGrades.join(', '));
     formData.set('subjects', checkedSubjects.join(', '));
     formData.set('sections', checkedSections.join(', '));
-    formData.set('department', departmentName); // keep the teacher in the same department
+    formData.set('department', departmentName);
     formData.set('teacherProfileId', selectedTeacherId);
 
     try {
@@ -80,6 +85,23 @@ export default function DepartmentAssignmentManager({
     }
   }
 
+  async function handleAddTeacher(formData: FormData) {
+    setIsPending(true);
+    formData.set('teacherProfileId', newTeacherId);
+    formData.set('departmentName', departmentName);
+
+    try {
+      await assignTeacherToDepartment(formData);
+      toast.success("Educator successfully assigned to department.");
+      setIsAddOpen(false);
+      setNewTeacherId('');
+    } catch (err: any) {
+      toast.error(err.message || "Failed to assign educator.");
+    } finally {
+      setIsPending(false);
+    }
+  }
+
   function openEdit(teacherId: string) {
     setSelectedTeacherId(teacherId);
     setIsOpen(true);
@@ -87,6 +109,16 @@ export default function DepartmentAssignmentManager({
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-black text-slate-800">Department Faculty</h3>
+        <button 
+          onClick={() => setIsAddOpen(true)}
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-2"
+        >
+          <UserPlus className="w-4 h-4" /> Add Educator
+        </button>
+      </div>
+
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[10px] tracking-wider">
@@ -142,6 +174,55 @@ export default function DepartmentAssignmentManager({
           </tbody>
         </table>
       </div>
+
+      {isAddOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fadeIn overflow-y-auto pt-10 pb-10">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl my-auto">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-lg font-black text-slate-800">Add Educator</h3>
+                <p className="text-xs text-slate-500">Assign an educator to {departmentName}</p>
+              </div>
+              <button onClick={() => setIsAddOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form action={handleAddTeacher} className="space-y-6 text-xs">
+              <div>
+                <label className="block text-slate-800 font-black mb-2">Select Educator</label>
+                {unassignedTeachers.length === 0 ? (
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 italic">
+                    All educators are already assigned to this department! 
+                    If you need to add someone, make sure they are not already here.
+                  </div>
+                ) : (
+                  <select 
+                    required 
+                    value={newTeacherId}
+                    onChange={(e) => setNewTeacherId(e.target.value)}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-medium"
+                  >
+                    <option value="" disabled>Choose an educator...</option>
+                    {unassignedTeachers.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.user.name} ({t.department || 'Unassigned'})
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
+                <button type="button" onClick={() => setIsAddOpen(false)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button disabled={isPending || !newTeacherId} type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm disabled:opacity-50">
+                  {isPending ? 'Assigning...' : 'Confirm Assignment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fadeIn overflow-y-auto pt-10 pb-10">

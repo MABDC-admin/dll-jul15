@@ -37,13 +37,13 @@ export default async function EditDLLPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto">
+    <div className="space-y-6 animate-fadeIn w-full">
       <div>
         <Link href="/teacher/dll" className="inline-flex items-center text-xs font-bold text-indigo-600 hover:text-indigo-800 mb-4">
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to DLL Library
         </Link>
         <h2 className="text-2xl font-black text-slate-800">Revise Daily Lesson Log</h2>
-        <p className="text-sm text-slate-500 mt-1">Update your instructional design based on Principal feedback.</p>
+        <p className="text-sm text-slate-500 mt-1">Update your instructional design based on Academic Director feedback.</p>
       </div>
       
       <EditDLLForm log={log} />

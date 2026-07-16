@@ -39,12 +39,20 @@ async function main() {
 
   for (let i = 0; i < teacherEmails.length; i++) {
     const email = teacherEmails[i];
+    let name = '';
+    if (email.includes('k1')) name = 'Teacher K1';
+    else if (email.includes('k2')) name = 'Teacher K2';
+    else {
+      const match = email.match(/teacher-(\d+)@mabdc\.org/);
+      name = match ? `Teacher ${match[1]}` : `Teacher ${i}`;
+    }
+
     const user = await prisma.user.upsert({
       where: { email },
       update: {},
       create: {
         email,
-        name: `Teacher ${i + 1}`,
+        name,
         passwordHash,
         role: 'TEACHER',
       },
@@ -58,7 +66,7 @@ async function main() {
         department: 'General',
         gradeLevels: JSON.stringify(['Grade 1']),
         sections: JSON.stringify(['Section A']),
-        subjects: JSON.stringify(['English']),
+        subjects: JSON.stringify(['Language', 'Reading and Literacy', 'Mathematics', 'Makabansa', 'GMRC']),
         schedule: 'Mon/Wed 9:00 AM',
         status: 'Active',
         avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
@@ -98,6 +106,20 @@ async function main() {
     { id: 'fil', name: 'Filipino', code: 'FIL', department: 'Languages', type: 'Core', targetBand: '75-100' },
     { id: 'ap', name: 'Araling Panlipunan', code: 'AP', department: 'Humanities', type: 'Core', targetBand: '75-100' },
     { id: 'mapeh', name: 'MAPEH', code: 'MAPEH', department: 'Arts & Health', type: 'Core', targetBand: '75-100' },
+    { id: 'lang', name: 'Language', code: 'LANG', department: 'Languages', type: 'Core', targetBand: '75-100' },
+    { id: 'read', name: 'Reading and Literacy', code: 'READ', department: 'Languages', type: 'Core', targetBand: '75-100' },
+    { id: 'maka', name: 'Makabansa', code: 'MAKA', department: 'Humanities', type: 'Core', targetBand: '75-100' },
+    { id: 'gmrc', name: 'GMRC', code: 'GMRC', department: 'Values', type: 'Core', targetBand: '75-100' },
+    { id: 'val', name: 'Values Education', code: 'VAL', department: 'Values', type: 'Core', targetBand: '75-100' },
+    { id: 'tle', name: 'EPP / TLE', code: 'TLE', department: 'Technology', type: 'Core', targetBand: '75-100' },
+    // Kindergarten Domains
+    { id: 'kind-soc', name: 'Socio-emotional Development', code: 'K-SOC', department: 'Kindergarten', type: 'Domain', targetBand: 'Kinder' },
+    { id: 'kind-val', name: 'Values Development', code: 'K-VAL', department: 'Kindergarten', type: 'Domain', targetBand: 'Kinder' },
+    { id: 'kind-aes', name: 'Aesthetic/Creative Development', code: 'K-AES', department: 'Kindergarten', type: 'Domain', targetBand: 'Kinder' },
+    { id: 'kind-phys', name: 'Physical Health and Motor Development', code: 'K-PHYS', department: 'Kindergarten', type: 'Domain', targetBand: 'Kinder' },
+    { id: 'kind-lang', name: 'Language, Literacy, and Communication', code: 'K-LANG', department: 'Kindergarten', type: 'Domain', targetBand: 'Kinder' },
+    { id: 'kind-math', name: 'Mathematics (Kinder)', code: 'K-MATH', department: 'Kindergarten', type: 'Domain', targetBand: 'Kinder' },
+    { id: 'kind-env', name: 'Understanding the Physical and Natural Environment', code: 'K-ENV', department: 'Kindergarten', type: 'Domain', targetBand: 'Kinder' },
   ];
 
   for (const s of subjects) {

@@ -30,7 +30,7 @@ export default function AttendanceClient({ gradeLevels }: { gradeLevels: Grade[]
       const newAttendanceMap: Record<string, string> = { ...existingRecords };
       
       // Default missing records to Present
-      roster.forEach(l => {
+      roster.forEach((l: any) => {
         if (!newAttendanceMap[l.id]) newAttendanceMap[l.id] = 'Present';
       });
       

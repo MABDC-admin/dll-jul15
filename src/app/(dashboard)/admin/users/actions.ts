@@ -37,13 +37,18 @@ export async function createUser(formData: FormData) {
       // Create teacher profile automatically if role is TEACHER
       teacherProfile: role === 'TEACHER' ? {
         create: {
-          department: "General",
-          advisoryClass: "Not Assigned",
-          complianceRate: 100,
+          department: "Unassigned",
+          gradeLevels: "[]",
+          sections: "[]",
+          subjects: "[]",
+          schedule: "[]",
           totalSubmitted: 0,
           approved: 0,
           forRevision: 0,
-          performanceScore: 0
+          missing: 0,
+          complianceRate: 100,
+          status: "Active",
+          avatar: ""
         }
       } : undefined
     }

@@ -22,6 +22,10 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     bg = "bg-rose-50";
     text = "text-rose-600 border-rose-200";
     Icon = AlertTriangle;
+  } else if (status.includes("Resolved")) {
+    bg = "bg-emerald-50";
+    text = "text-emerald-600 border-emerald-200";
+    Icon = CheckCircle;
   }
 
   return (
