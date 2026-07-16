@@ -68,5 +68,6 @@ export async function updateTeacherAvatar(teacherProfileId: string, avatarUrl: s
   });
 
   revalidatePath(`/principal/teachers/${teacherProfileId}`);
+  revalidatePath('/principal/teachers');
   return { success: true };
 }
